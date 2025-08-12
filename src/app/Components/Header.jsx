@@ -203,7 +203,7 @@ export default function Header({
                 <p className="text-sm mt-8">
                   Get in touch{" "}
                   <span className="text-[#EFBF04] cursor-pointer">
-                    contact@assetlocka.com
+                    contact@passket.com
                   </span>
                 </p>
                 <div className="flex gap-5 text-[#EFBF04] text-lg mt-4 pb-20">
