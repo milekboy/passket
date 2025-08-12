@@ -36,7 +36,7 @@ export default function HeroCarousel({
 
   return (
     <section
-      className={`relative w-full ${heightClass} overflow-hidden`}
+      className={`relative lg:-mt-[83px] w-full ${heightClass} overflow-hidden`}
       onMouseEnter={pause}
       onMouseLeave={resume}
     >
