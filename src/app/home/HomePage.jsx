@@ -3,6 +3,7 @@ import HeroCarousel from "../Components/Hero";
 import SearchFilters from "../Components/SearchFilter";
 import TrendingRail from "../Components/TrendingRail";
 import HowItWorks from "../Components/HowItWorks";
+import OrganiserCTA from "../Components/OrganisersCTA";
 export default function HomePage() {
   const slides = [
     {
@@ -91,6 +92,7 @@ export default function HomePage() {
       <SearchFilters />
       <TrendingRail events={demoEvents} />
       <HowItWorks />
+      <OrganiserCTA brandName="Passket" />
     </div>
   );
 }
