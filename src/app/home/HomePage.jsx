@@ -4,6 +4,8 @@ import SearchFilters from "../Components/SearchFilter";
 import TrendingRail from "../Components/TrendingRail";
 import HowItWorks from "../Components/HowItWorks";
 import OrganiserCTA from "../Components/OrganisersCTA";
+import MiniFAQ from "../Components/MiniFaq";
+import Footer from "../Components/Footer";
 export default function HomePage() {
   const slides = [
     {
@@ -93,6 +95,8 @@ export default function HomePage() {
       <TrendingRail events={demoEvents} />
       <HowItWorks />
       <OrganiserCTA brandName="Passket" />
+      <MiniFAQ />
+      <Footer />
     </div>
   );
 }
