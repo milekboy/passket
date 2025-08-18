@@ -5,7 +5,7 @@ const SLIDE_INTERVAL = 6000;
 
 export default function HeroCarousel({
   slides = [],
-  heightClass = "h-[100vh]",
+  heightClass = "h-[80vh]",
 }) {
   const [index, setIndex] = useState(0);
   const timer = useRef(null);
