@@ -79,11 +79,25 @@ export default function HeroCarousel({
           {active.ctaText && (
             <a
               href={active.ctaHref || "#"}
-              className="inline-block mt-7 rounded-md bg-rose-500 px-6 py-3 text-sm md:text-base font-medium hover:bg-rose-600 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2 focus:ring-offset-black"
+              style={{
+                animation: "zooming 1.2s infinite cubic-bezier(0.4, 0, 0.2, 1)",
+              }}
+              className="inline-block mt-7 rounded-md bg-rose-500 px-6 py-3 text-sm md:text-base font-medium hover:bg-rose-600 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2 focus:ring-offset-black animate-zoom"
             >
               {active.ctaText}
             </a>
           )}
+          <style jsx>{`
+            @keyframes zooming {
+              0%,
+              100% {
+                transform: scale(1);
+              }
+              50% {
+                transform: scale(1.08);
+              }
+            }
+          `}</style>
         </div>
       </div>
 

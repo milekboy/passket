@@ -68,9 +68,9 @@ export default function Header({
             </li>
             <li>
               <Link
-                href="/about-us"
+                href="/events"
                 className={`text-sm font-semibold tracking-wider hover:text-blueGray-500 ${
-                  pathname === "/about-us"
+                  pathname === "/events"
                     ? "text-[#EFBF04]"
                     : "text-blueGray-600"
                 }`}
@@ -170,7 +170,7 @@ export default function Header({
               </Link>
             </li>
             <li>
-              <Link href="/about-us" onClick={closeMenu}>
+              <Link href="/events" onClick={closeMenu}>
                 All Events
               </Link>
             </li>

@@ -178,9 +178,9 @@ export default function SearchFilters({
 
           <button
             type="submit"
-            className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl bg-pink-600 px-6 py-3 font-semibold text-white transition hover:brightness-110"
+            className="group cursor-pointer relative inline-flex items-center justify-center overflow-hidden rounded-xl bg-pink-600 px-6 py-3 font-semibold text-white transition hover:brightness-110"
           >
-            <span className="absolute inset-0 -z-10 bg-gradient-to-r from-pink-600 via-fuchsia-600 to-pink-600 opacity-0 blur-xl transition-opacity duration-300 group-hover:opacity-60" />
+            <span className="absolute  inset-0 -z-10 bg-gradient-to-r from-pink-600 via-fuchsia-600 to-pink-600 opacity-0 blur-xl transition-opacity duration-300 group-hover:opacity-60" />
             Search events
           </button>
         </div>
