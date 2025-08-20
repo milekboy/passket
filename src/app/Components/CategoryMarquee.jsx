@@ -11,15 +11,16 @@ export default function CategoryMarquee({
   const scrollerRef = useRef(null);
   const rafRef = useRef(null);
   const pausedRef = useRef(false);
+  const draggingRef = useRef(false); // track if we actually dragged
   const [reduceMotion, setReduceMotion] = useState(false);
 
-  // Duplicate list for seamless wrap-around
+  // Duplicate once for seamless loop
   const data = useMemo(
     () => (categories.length ? [...categories, ...categories] : []),
     [categories]
   );
 
-  // (Optional) respect OS "reduce motion" — set to false if you always want motion
+  // Respect prefers-reduced-motion (flip to always-false if you want constant motion)
   useEffect(() => {
     if (typeof window !== "undefined" && window.matchMedia) {
       const m = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -35,12 +36,11 @@ export default function CategoryMarquee({
     const el = scrollerRef.current;
     if (!el || !data.length || reduceMotion) return;
 
-    // Only animate if overflow exists
     const hasOverflow = el.scrollWidth > el.clientWidth + 2;
     if (!hasOverflow) return;
 
     let last = null;
-    const SPEED = 60; // px/sec – tweak to taste
+    const SPEED = 60; // px/sec
 
     const step = (ts) => {
       if (!el) return;
@@ -51,28 +51,21 @@ export default function CategoryMarquee({
       if (!pausedRef.current) {
         el.scrollLeft += SPEED * dt;
 
-        // Correct loop point: half of the *scrollable distance*
+        // loop distance = one set of items
         const maxScroll = el.scrollWidth - el.clientWidth;
         const loopPoint = maxScroll / 2;
-
-        if (el.scrollLeft >= loopPoint) {
-          el.scrollLeft -= loopPoint; // seamless jump back by one "set"
-        }
+        if (el.scrollLeft >= loopPoint) el.scrollLeft -= loopPoint;
       }
       rafRef.current = requestAnimationFrame(step);
     };
 
-    // Kick off
     rafRef.current = requestAnimationFrame(step);
 
-    // Re-run if layout changes (e.g., images load) by nudging scrollLeft
-    const rebalance = () => {
-      if (!el) return;
+    const ro = new ResizeObserver(() => {
+      // keep scrollLeft within the first set if sizes change
       const maxScroll = el.scrollWidth - el.clientWidth;
-      if (maxScroll <= 0) return; // no overflow anymore
-      el.scrollLeft = el.scrollLeft % (maxScroll / 2);
-    };
-    const ro = new ResizeObserver(rebalance);
+      if (maxScroll > 0) el.scrollLeft = el.scrollLeft % (maxScroll / 2);
+    });
     ro.observe(el);
 
     return () => {
@@ -81,7 +74,7 @@ export default function CategoryMarquee({
     };
   }, [data, reduceMotion]);
 
-  // Drag / swipe / wheel
+  // Drag / swipe / wheel (NO pointer capture; keep clicks intact)
   useEffect(() => {
     const el = scrollerRef.current;
     if (!el) return;
@@ -91,34 +84,41 @@ export default function CategoryMarquee({
     let startLeft = 0;
     let wheelTimer = null;
 
+    const DRAG_THRESHOLD = 5; // px
+
     const pauseFor = (ms = 600) => {
       pausedRef.current = true;
       clearTimeout(wheelTimer);
-      wheelTimer = setTimeout(() => {
-        pausedRef.current = false;
-      }, ms);
+      wheelTimer = setTimeout(() => (pausedRef.current = false), ms);
     };
 
-    // Pointer events (mouse + touch)
     const onPointerDown = (e) => {
       isDown = true;
-      el.setPointerCapture?.(e.pointerId);
+      draggingRef.current = false;
       pausedRef.current = true;
       startX = e.clientX;
       startLeft = el.scrollLeft;
     };
+
     const onPointerMove = (e) => {
       if (!isDown) return;
       const delta = e.clientX - startX;
+      if (Math.abs(delta) > DRAG_THRESHOLD) draggingRef.current = true;
       el.scrollLeft = startLeft - delta;
     };
-    const onPointerUp = (e) => {
+
+    const onPointerUp = () => {
       isDown = false;
-      el.releasePointerCapture?.(e.pointerId);
-      pausedRef.current = false;
+      // if we dragged, we stay paused a tick to avoid jumpiness
+      if (draggingRef.current) pauseFor(200);
+      else pausedRef.current = false;
+      draggingRef.current = false;
     };
 
     const onWheel = () => pauseFor(800);
+
+    // If user clicks while dragging, let native click logic decide.
+    // We do NOT preventDefault here—so button onClick still fires.
 
     el.addEventListener("pointerdown", onPointerDown);
     el.addEventListener("pointermove", onPointerMove);
@@ -155,7 +155,7 @@ export default function CategoryMarquee({
 
       <div
         ref={scrollerRef}
-        className="hide-scrollbar relative mx-auto flex gap-4 overflow-x-auto px-4 pb-3 sm:px-6"
+        className="hide-scrollbar relative mx-auto flex gap-4 overflow-x-auto px-4 pb-3 sm:px-6 select-none touch-pan-x cursor-grab active:cursor-grabbing"
         onMouseEnter={() => (pausedRef.current = true)}
         onMouseLeave={() => (pausedRef.current = false)}
       >
@@ -165,7 +165,7 @@ export default function CategoryMarquee({
             <button
               key={`${cat.id}-${i}`}
               onClick={() => onSelect?.(selected ? null : cat.id)}
-              className={`group cursor-pointer relative flex w-[120px] flex-col items-center rounded-2xl border bg-white/5 p-3 backdrop-blur-md transition hover:bg-white/10
+              className={`group relative flex w-[120px] flex-col items-center rounded-2xl border bg-white/5 p-3 backdrop-blur-md transition hover:bg-white/10
                 ${
                   selected
                     ? "border-yellow-400/50 ring-2 ring-yellow-300/40"
