@@ -8,8 +8,8 @@ import { IoMdClose } from "react-icons/io";
 export default function Header({
   handleContactClick,
   handleCompanyClick,
-  handleServicesClick,
-  handleSecureClick,
+
+  handleFaqClick,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -25,21 +25,18 @@ export default function Header({
   const toggleMenu = () => setMenuOpen((v) => !v);
   const closeMenu = () => setMenuOpen(false);
 
-  const scrollToServices = () => {
-    if (pathname !== "/") router.push("/?scroll=services");
-    else handleServicesClick?.();
-  };
   const scrollToCompany = () => {
-    if (pathname !== "/") router.push("/?scroll=services");
+    if (pathname !== "/") router.push("/?scroll=company");
     else handleCompanyClick?.();
   };
+
   const scrollToContact = () => {
     if (pathname !== "/") router.push("/?scroll=contact");
     else handleContactClick?.();
   };
-  const scrollToSecure = () => {
-    if (pathname !== "/") router.push("/?scroll=contact");
-    else handleSecureClick?.();
+  const scrollToFaq = () => {
+    if (pathname !== "/") router.push("/?scroll=faq");
+    else handleFaqClick?.();
   };
 
   return (
@@ -80,15 +77,15 @@ export default function Header({
             </li>
             <li
               className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500 tracking-wide cursor-pointer"
-              onClick={scrollToServices}
+              onClick={scrollToCompany}
             >
               About us
             </li>
             <li
               className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500 tracking-wide cursor-pointer"
-              onClick={scrollToCompany}
+              onClick={scrollToFaq}
             >
-              Plans
+              Faqs
             </li>
             <li
               className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500 tracking-wide cursor-pointer"
@@ -177,7 +174,7 @@ export default function Header({
             <li
               onClick={() => {
                 closeMenu();
-                scrollToServices();
+                scrollToCompany();
               }}
             >
               About Us
@@ -185,10 +182,10 @@ export default function Header({
             <li
               onClick={() => {
                 closeMenu();
-                scrollToCompany();
+                scrollToFaq();
               }}
             >
-              Plans
+              Faqs
             </li>
             <li
               onClick={() => {

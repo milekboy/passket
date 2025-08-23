@@ -40,7 +40,7 @@ export default function EventCard({ ev }) {
             </span>
           </span>
           <Link
-            href={`/events/${ev.id}`}
+            href={`/event-detail/`}
             className="rounded-lg bg-pink-600 px-3 py-1.5 text-sm font-medium text-white hover:brightness-110"
           >
             Get Tickets

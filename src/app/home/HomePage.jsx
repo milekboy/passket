@@ -1,12 +1,40 @@
+"use client";
 import Header from "../Components/Header";
+import { useRef, useEffect } from "react";
 import HeroCarousel from "../Components/Hero";
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import SearchFilters from "../Components/SearchFilter";
 import TrendingRail from "../Components/TrendingRail";
 import HowItWorks from "../Components/HowItWorks";
 import OrganiserCTA from "../Components/OrganisersCTA";
 import MiniFAQ from "../Components/MiniFaq";
 import Footer from "../Components/Footer";
+
+function ScrollHandler({ featuresRef, contactRef, faqRef, companyRef }) {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const scrollTarget = searchParams.get("scroll");
+    if (scrollTarget === "contact") {
+      contactRef.current?.scrollIntoView({ behavior: "smooth" });
+    } else if (scrollTarget === "services") {
+      featuresRef.current?.scrollIntoView({ behavior: "smooth" });
+    } else if (scrollTarget === "faq") {
+      faqRef.current?.scrollIntoView({ behavior: "smooth" });
+    } else if (scrollTarget === "company") {
+      companyRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [searchParams, contactRef, featuresRef, faqRef, companyRef]);
+
+  return null;
+}
+
 export default function HomePage() {
+  const contactRef = useRef(null);
+  const featuresRef = useRef(null);
+  const faqRef = useRef(null);
+  const companyRef = useRef(null);
   const slides = [
     {
       image:
@@ -89,13 +117,31 @@ export default function HomePage() {
   ];
   return (
     <div>
-      <Header />
+      <Header
+        handleContactClick={() =>
+          contactRef.current?.scrollIntoView({ behavior: "smooth" })
+        }
+        handleCompanyClick={() =>
+          companyRef.current?.scrollIntoView({ behavior: "smooth" })
+        }
+        handleFaqClick={() =>
+          faqRef.current?.scrollIntoView({ behavior: "smooth" })
+        }
+      />
+      <Suspense fallback={null}>
+        <ScrollHandler
+          contactRef={contactRef}
+          featuresRef={featuresRef}
+          faqRef={faqRef}
+          companyRef={companyRef}
+        />
+      </Suspense>
       <HeroCarousel slides={slides} />
       <SearchFilters />
       <TrendingRail events={demoEvents} />
-      <HowItWorks />
+      <HowItWorks ref={companyRef} />
       <OrganiserCTA brandName="Passket" />
-      <MiniFAQ />
+      <MiniFAQ ref={faqRef} />
       <Footer />
     </div>
   );

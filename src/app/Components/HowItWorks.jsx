@@ -1,4 +1,6 @@
-export default function HowItWorks() {
+import { forwardRef } from "react";
+
+const HowItWorks = forwardRef(function Plan(props, ref) {
   const steps = [
     {
       title: "Browse events",
@@ -49,7 +51,10 @@ export default function HowItWorks() {
   ];
 
   return (
-    <section className="relative mx-auto mt-20 max-w-7xl px-4 sm:px-6">
+    <section
+      ref={ref}
+      className="relative mx-auto mt-20 max-w-7xl px-4 sm:px-6"
+    >
       <div
         className="pointer-events-none absolute inset-x-0 -top-10 h-40 blur-2xl"
         style={{
@@ -82,4 +87,5 @@ export default function HowItWorks() {
       </div>
     </section>
   );
-}
+});
+export default HowItWorks;

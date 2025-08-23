@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, forwardRef } from "react";
 
-export default function FAQTabs() {
+const FAQTabs = forwardRef(function Plan(props, ref) {
   const TABS = ["Attendees", "Organisers"];
   const [active, setActive] = useState("Attendees");
   const tablistRef = useRef(null);
@@ -70,7 +70,7 @@ export default function FAQTabs() {
   const list = active === "Attendees" ? attendees : organisers;
 
   return (
-    <section className="mx-auto mt-16 mb-20 max-w-7xl px-4 sm:px-6">
+    <section ref={ref} className="mx-auto mt-16 mb-20 max-w-7xl px-4 sm:px-6">
       <h2 className="mb-6 text-center text-2xl font-bold text-white">FAQs</h2>
 
       {/* Tabs */}
@@ -133,4 +133,5 @@ export default function FAQTabs() {
       </p>
     </section>
   );
-}
+});
+export default FAQTabs;
