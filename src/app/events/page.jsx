@@ -1,8 +1,11 @@
 // app/events/page.jsx
-
+"use client";
+import { useState, useEffect } from "react";
+import NetworkInstance from "../Components/NetworkInstance";
 import EventPageMain from "../Components/EventPageMain";
 import Footer from "../Components/Footer";
 import Header from "../Components/Header";
+
 const demoEvents = [
   {
     id: "1",
@@ -69,6 +72,20 @@ const demoEvents = [
 ];
 
 export default function EventsPage() {
+  const [events, setEvents] = useState([]);
+  const networkInstance = NetworkInstance();
+  useEffect(() => {
+    getEvents();
+  }, []);
+  const getEvents = async () => {
+    try {
+      const res = await networkInstance.get("/event");
+      setEvents(res.data.data.data);
+      console.log("Events data:", res.data.data.data);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+  };
   return (
     <main className="pb-24">
       <Header />
