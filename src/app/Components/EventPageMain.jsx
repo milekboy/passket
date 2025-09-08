@@ -93,7 +93,7 @@ export default function EventPageMain({
       {/* Categories loop */}
       <CategoryMarquee
         categories={categories}
-        activeId={activeCat}
+        activeId={events}
         onSelect={(id) => setActiveCat(id)}
         className="mx-auto max-w-7xl"
       />

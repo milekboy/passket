@@ -112,12 +112,12 @@ export default function EventDetailMain({
     id: "",
     title: "",
     coverImage: "",
-    startsAt: "",
-    endsAt: null,
+    startDate: "",
+    endDate: null,
     venueName: "",
     address: "",
     city: "",
-    organiser: "",
+    organiserName: "",
     descriptionHtml: "",
     categories: [],
     tickets: [],
@@ -186,7 +186,7 @@ export default function EventDetailMain({
       eventId: event.id,
       eventTitle: event.title,
       venueName: event.venueName,
-      startsAt: event.startsAt,
+      startsAt: event.startDate,
       selection: sel,
       lines,
       ticketSubtotal,
@@ -226,20 +226,15 @@ export default function EventDetailMain({
         <div>
           {/* Cover / poster */}
           <div className="relative aspect-[16/9] w-full overflow-hidden rounded-3xl border border-white/10 bg-white/5">
-            {event.coverImage ? (
-              <Image
-                src={event.coverImage}
-                alt={event.title}
-                fill
-                className="object-cover"
-                priority
-                sizes="(min-width: 1024px) 60vw, 100vw"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-white/50">
-                No image
-              </div>
-            )}
+            <Image
+              src="https://res.cloudinary.com/dbpjskran/image/upload/v1754989530/event_nrufbc.jpg"
+              alt="event cover image"
+              fill
+              className="object-cover"
+              priority
+              sizes="(min-width: 1024px) 60vw, 100vw"
+            />
+
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/10" />
             <div className="absolute bottom-4 left-4 right-4">
               <h1 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
@@ -252,14 +247,14 @@ export default function EventDetailMain({
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
             <MetaCard
               label="Date & Time"
-              value={formatDateRange(event.startsAt, event.endsAt)}
+              value={formatDateRange(event.startDate, event.endDate)}
               icon={<CalendarIcon />}
             />
             <MetaCard
               label="Venue"
               value={
                 <span>
-                  {event.venueName}
+                  {event.location}
                   {event.city ? `, ${event.city}` : ""}
                   {event.address ? (
                     <span className="block text-white/50">{event.address}</span>
@@ -270,7 +265,7 @@ export default function EventDetailMain({
             />
             <MetaCard
               label="Organiser"
-              value={event.organiser || "—"}
+              value={event.organiserName || "—"}
               icon={<UserIcon />}
             />
           </div>
@@ -306,10 +301,10 @@ export default function EventDetailMain({
             <h3 className="mb-3 text-lg font-semibold text-white">
               About this event
             </h3>
-            {event.descriptionHtml ? (
+            {event.description ? (
               <article
                 className="prose prose-invert prose-p:leading-relaxed prose-a:text-yellow-300"
-                dangerouslySetInnerHTML={{ __html: event.descriptionHtml }}
+                dangerouslySetInnerHTML={{ __html: event.description }}
               />
             ) : (
               <p className="text-white/70">No description provided yet.</p>

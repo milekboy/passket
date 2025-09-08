@@ -10,7 +10,7 @@ import { TicketIcon } from "@heroicons/react/24/solid"; // heroicons for excitem
 
 export default function LoginPage() {
   const router = useRouter();
-
+  const networkInstance = NetworkInstance();
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -25,7 +25,7 @@ export default function LoginPage() {
     setError("");
 
     try {
-      await NetworkInstance.post("/auth/login", form);
+      await networkInstance.post("/User/login", form);
       router.push("/dashboard");
     } catch (err) {
       console.error(err);

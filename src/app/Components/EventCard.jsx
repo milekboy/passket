@@ -1,12 +1,26 @@
+"use client";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function EventCard({ ev }) {
+  const date = new Date("2027-06-15T09:00:00Z");
+
+  const options = {
+    weekday: "short", // Sat
+    month: "short", // Oct
+    day: "numeric", // 4
+    hour: "numeric", // 9
+    minute: "2-digit", // 00
+    hour12: true, // AM/PM
+  };
+
+  const formatted = date.toLocaleString("en-US", options).replace(",", " •");
+
   return (
     <article className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5">
       <div className="relative h-44 w-full">
         <Image
-          src={ev.image}
+          src="https://images.unsplash.com/photo-1506157786151-b8491531f063?q=80&w=1920&auto=format&fit=crop"
           alt={`${ev.title} poster`}
           fill
           className="object-cover"
@@ -30,8 +44,20 @@ export default function EventCard({ ev }) {
         <h3 className="line-clamp-2 text-base font-semibold text-white">
           {ev.title}
         </h3>
-        <p className="text-sm text-white/70">{ev.date}</p>
-        <p className="text-sm text-white/60">{ev.venue}</p>
+        <p className="text-sm text-white/70">
+          {new Date(ev.startDate)
+            .toLocaleString("en-US", {
+              weekday: "short", // Sat
+              month: "short", // Oct
+              day: "numeric", // 4
+              year: "numeric", // 2027
+              hour: "numeric", // 9
+              minute: "2-digit",
+              hour12: true,
+            })
+            .replace(",", " •")}
+        </p>
+        <p className="text-sm text-white/60">{ev.location}</p>
         <div className="flex items-center justify-between pt-2">
           <span className="text-sm text-white/80">
             From{" "}
@@ -40,7 +66,7 @@ export default function EventCard({ ev }) {
             </span>
           </span>
           <Link
-            href={`/event-detail/`}
+            href={`/event-detail/${ev.id}`}
             className="rounded-lg bg-pink-600 px-3 py-1.5 text-sm font-medium text-white hover:brightness-110"
           >
             Get Tickets

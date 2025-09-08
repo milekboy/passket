@@ -1,6 +1,6 @@
 "use client";
 import Header from "../Components/Header";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import HeroCarousel from "../Components/Hero";
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
@@ -10,7 +10,7 @@ import HowItWorks from "../Components/HowItWorks";
 import OrganiserCTA from "../Components/OrganisersCTA";
 import MiniFAQ from "../Components/MiniFaq";
 import Footer from "../Components/Footer";
-
+import NetworkInstance from "../Components/NetworkInstance";
 function ScrollHandler({ featuresRef, contactRef, faqRef, companyRef }) {
   const searchParams = useSearchParams();
 
@@ -65,56 +65,21 @@ export default function HomePage() {
       ctaHref: "/events/dua-lipa",
     },
   ];
-  const demoEvents = [
-    {
-      id: "d1z",
-      title: "D1Z World Tour – Lagos Night 1",
-      date: "Fri, Sep 12 • 7:00 PM",
-      venue: "Eko Convention Centre",
-      priceFrom: 15000,
-      image:
-        "https://res.cloudinary.com/dbpjskran/image/upload/v1754989530/event_nrufbc.jpg",
-      badge: "Few left",
-    },
-    {
-      id: "d1zf",
-      title: "D1Z World Tour – Lagos Night 1",
-      date: "Fri, Sep 12 • 7:00 PM",
-      venue: "Eko Convention Centre",
-      priceFrom: 15000,
-      image:
-        "https://images.unsplash.com/photo-1506157786151-b8491531f063?q=80&w=1920&auto=format&fit=crop",
-      badge: "Few left",
-    },
-    {
-      id: "techfest",
-      title: "Lagos Tech Fest 2025",
-      date: "Sat, Sep 20 • 9:00 AM",
-      venue: "Landmark Centre",
-      priceFrom: 5000,
-      image:
-        "https://images.unsplash.com/photo-1506157786151-b8491531f063?q=80&w=1920&auto=format&fit=crop",
-      badge: "Early bird",
-    },
-    {
-      id: "laughcity",
-      title: "Laugh City: XXL Comedy Special",
-      date: "Sun, Sep 28 • 6:30 PM",
-      venue: "Terra Kulture",
-      priceFrom: 7000,
-      image:
-        "https://images.unsplash.com/photo-1506157786151-b8491531f063?q=80&w=1920&auto=format&fit=crop",
-    },
-    {
-      id: "derby",
-      title: "Island Derby – 5-A-Side Finals",
-      date: "Sat, Oct 4 • 4:00 PM",
-      venue: "Oniru Arena",
-      priceFrom: 3000,
-      image:
-        "https://images.unsplash.com/photo-1506157786151-b8491531f063?q=80&w=1920&auto=format&fit=crop",
-    },
-  ];
+
+  const [events, setEvents] = useState([]);
+  const networkInstance = NetworkInstance();
+  useEffect(() => {
+    getEvents();
+  }, []);
+  const getEvents = async () => {
+    try {
+      const res = await networkInstance.get("/event");
+      setEvents(res.data.events);
+      console.log("Events data:", res.data.events);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+  };
   return (
     <div>
       <Header
@@ -138,7 +103,7 @@ export default function HomePage() {
       </Suspense>
       <HeroCarousel slides={slides} />
       <SearchFilters />
-      <TrendingRail events={demoEvents} />
+      <TrendingRail events={events} />
       <HowItWorks ref={companyRef} />
       <OrganiserCTA brandName="Passket" />
       <MiniFAQ ref={faqRef} />
