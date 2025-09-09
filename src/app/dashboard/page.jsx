@@ -6,11 +6,12 @@ import {
   PlusCircleIcon,
   ArrowUpRightIcon,
   ArrowDownRightIcon,
-  CurrencyEuroIcon,
+  BanknotesIcon,
   CheckCircleIcon,
 } from "@heroicons/react/24/outline";
 import NetworkInstance from "../Components/NetworkInstance";
 import DashboardLayout from "./DashboardLayout";
+
 const fmtNaira = (n) =>
   new Intl.NumberFormat("en-NG", {
     style: "currency",
@@ -90,7 +91,7 @@ export default function DashboardHome() {
     <DashboardLayout>
       <section className="space-y-8">
         {/* Page title + quick CTA */}
-        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+        <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-extrabold tracking-tight text-white">
               Dashboard
@@ -101,7 +102,7 @@ export default function DashboardHome() {
           </div>
           <Link
             href="/dashboard/events/new"
-            className="inline-flex items-center gap-2 rounded-xl border border-yellow-400/40 bg-yellow-400/10 px-4 py-2 text-sm font-semibold text-yellow-300 hover:bg-yellow-400/20"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-yellow-400/40 bg-yellow-400/10 px-4 py-2 text-sm font-semibold text-yellow-300 hover:bg-yellow-400/20 sm:w-auto"
           >
             <PlusCircleIcon className="h-5 w-5" />
             Create Event
@@ -109,7 +110,7 @@ export default function DashboardHome() {
         </div>
 
         {/* KPI cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Stat
             label="Tickets sold"
             value={stats.totalSold.toLocaleString()}
@@ -120,7 +121,7 @@ export default function DashboardHome() {
             label="Gross revenue"
             value={fmtNaira(stats.gross)}
             chip="All events"
-            icon={<CurrencyEuroIcon className="h-5 w-5" />}
+            icon={<BanknotesIcon className="h-5 w-5" />}
           />
           <Stat
             label="Fees paid"
@@ -137,13 +138,14 @@ export default function DashboardHome() {
         </div>
 
         {/* Balance / Withdraw */}
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {/* Balance card */}
           <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md lg:col-span-1">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-white">
                 Current Balance
               </h3>
-              <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-white/70">
+              <span className="rounded-full w-full border border-white/10 bg-white/5 px-2 flex justify-center items-center py-0.5 text-[11px] text-white/70">
                 NDPA/NDPC compliant
               </span>
             </div>
@@ -154,19 +156,20 @@ export default function DashboardHome() {
               After fees. Updates in real-time after sales.
             </p>
 
-            <div className="mt-4 flex items-center gap-2">
+            {/* Withdraw controls: stack on mobile */}
+            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
               <input
                 type="number"
                 min="0"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="Amount"
-                className="w-1/2 rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-white placeholder-white/40 focus:border-yellow-400 focus:ring focus:ring-yellow-400/30"
+                className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-white placeholder-white/40 focus:border-yellow-400 focus:ring focus:ring-yellow-400/30"
               />
               <button
                 onClick={doWithdraw}
                 disabled={withdrawing || !amount}
-                className="flex-1 rounded-lg bg-pink-600 px-4 py-2 font-semibold text-white hover:brightness-110 disabled:opacity-50"
+                className="w-full rounded-lg bg-pink-600 px-4 py-2 font-semibold text-white hover:brightness-110 disabled:opacity-50"
               >
                 {withdrawing ? "Processing..." : "Withdraw"}
               </button>
@@ -177,8 +180,8 @@ export default function DashboardHome() {
             </p>
           </div>
 
-          {/* Recent events table */}
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md lg:col-span-2">
+          {/* Recent events: mobile cards + desktop table */}
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md lg:col-span-2 ">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-white">
                 Recent Events
@@ -191,7 +194,69 @@ export default function DashboardHome() {
               </Link>
             </div>
 
-            <div className="overflow-x-auto">
+            {/* Mobile: card list */}
+            <ul className="space-y-3 md:hidden">
+              {events.map((ev) => (
+                <li
+                  key={ev.id}
+                  className="rounded-xl border border-white/10 bg-black/40 p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-white font-semibold">{ev.title}</div>
+                      <div className="mt-1 text-sm text-white/60">
+                        {ev.date}
+                      </div>
+                      <div className="mt-1 text-sm text-white/70">
+                        {fmtNaira(ev.revenue)} • {ev.ticketsSold} sold
+                      </div>
+                    </div>
+                    <span
+                      className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] ${
+                        ev.status === "Published"
+                          ? "bg-emerald-500/20 text-emerald-300"
+                          : "bg-white/10 text-white/70"
+                      }`}
+                    >
+                      {ev.status}
+                    </span>
+                  </div>
+
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Link
+                      href={`/dashboard/events/${ev.id}/edit`}
+                      className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:bg-white/10"
+                    >
+                      Edit
+                    </Link>
+                    {ev.status !== "Published" ? (
+                      <Link
+                        href={`/dashboard/events/${ev.id}/publish`}
+                        className="rounded-lg border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-xs text-yellow-300 hover:bg-yellow-400/20"
+                      >
+                        Publish
+                      </Link>
+                    ) : (
+                      <Link
+                        href={`/dashboard/events/${ev.id}/tickets`}
+                        className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:bg-white/10"
+                      >
+                        Manage tickets
+                      </Link>
+                    )}
+                    <Link
+                      href={`/dashboard/events/${ev.id}/delete`}
+                      className="rounded-lg border border-red-400/30 bg-red-400/10 px-3 py-1.5 text-xs text-red-300 hover:bg-red-400/20"
+                    >
+                      Delete
+                    </Link>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            {/* Desktop: table */}
+            <div className="hidden md:block overflow-x-auto overflow-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
               <table className="min-w-full text-left text-sm text-white/80">
                 <thead className="text-xs uppercase text-white/50">
                   <tr>
@@ -241,7 +306,7 @@ export default function DashboardHome() {
                               href={`/dashboard/events/${ev.id}/tickets`}
                               className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:bg-white/10"
                             >
-                              Manage tickets
+                              Manage
                             </Link>
                           )}
                           <Link
@@ -267,7 +332,7 @@ export default function DashboardHome() {
         </div>
 
         {/* Quick actions */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <QuickAction
             title="Create event"
             href="/dashboard/events/new"

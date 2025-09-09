@@ -1,5 +1,5 @@
 "use client";
-
+import { useAuth } from "../Components/AuthContext";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import NetworkInstance from "../Components/NetworkInstance";
@@ -9,6 +9,7 @@ import LoadingTicket from "../Components/LoadingTicket";
 import { TicketIcon } from "@heroicons/react/24/solid"; // heroicons for excitement
 
 export default function LoginPage() {
+  const { login } = useAuth();
   const router = useRouter();
   const networkInstance = NetworkInstance();
   const [form, setForm] = useState({ email: "", password: "" });
@@ -25,7 +26,21 @@ export default function LoginPage() {
     setError("");
 
     try {
-      await networkInstance.post("/User/login", form);
+      // 1. Login
+      const res = await networkInstance.post("/User/login", form);
+      const token = res.data.token;
+
+      // 2. Get user details
+      const me = await networkInstance.get("/User/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      console.log("User:", me.data);
+
+      // 3. Save user + token in context
+      login({ user: me.data, token });
+
+      // 4. Redirect
       router.push("/dashboard");
     } catch (err) {
       console.error(err);

@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "../Components/AuthContext";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -14,8 +16,20 @@ import {
 
 export default function DashboardLayout({ children }) {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
+  const { user, token, logout } = useAuth();
   const pathname = usePathname();
+  // console.log(user, token);
+  useEffect(() => {
+    if (!user || !token) {
+      router.push("/login");
+    }
+  }, [user, token, router]);
 
+  const handleLogout = () => {
+    logout();
+    router.push("/login");
+  };
   const nav = [
     { name: "Overview", href: "/dashboard", icon: Squares2X2Icon },
     { name: "Events", href: "/dashboard/events", icon: CalendarIcon },
@@ -46,9 +60,12 @@ export default function DashboardLayout({ children }) {
 
           <div className="flex items-center gap-3">
             <span className="hidden text-sm text-white/70 sm:block">
-              Hello, Organizer
+              Hello, {user?.firstName || "User"}
             </span>
-            <button className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white hover:bg-white/10">
+            <button
+              onClick={handleLogout}
+              className="rounded-xl border cursor-pointer border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white hover:bg-white/10"
+            >
               <ArrowRightOnRectangleIcon className="mr-1 inline h-4 w-4" />
               Logout
             </button>
@@ -64,6 +81,11 @@ export default function DashboardLayout({ children }) {
             open ? "translate-x-0" : "-translate-x-full"
           }`}
         >
+          {/* 👇 Add greeting here */}
+          <div className="mb-4 lg:hidden text-sm font-medium text-white/80">
+            Hello, {user?.firstName || "User"}
+          </div>
+
           <nav className="space-y-1">
             {nav.map((item) => {
               const active = pathname === item.href;
@@ -84,19 +106,7 @@ export default function DashboardLayout({ children }) {
               );
             })}
           </nav>
-
-          <div className="mt-6 rounded-xl border border-white/10 bg-white/5 p-4">
-            <div className="text-xs uppercase tracking-wide text-white/50">
-              Current plan
-            </div>
-            <div className="mt-1 text-sm text-white">Starter</div>
-            <div className="mt-3 h-2 w-full overflow-hidden rounded bg-white/10">
-              <div className="h-full w-1/3 bg-yellow-400" />
-            </div>
-            <div className="mt-2 text-xs text-white/60">
-              2 / 6 active events
-            </div>
-          </div>
+          {/* ... */}
         </aside>
 
         {/* Content */}
