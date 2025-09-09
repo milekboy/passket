@@ -36,7 +36,7 @@ export default function RegisterPage() {
     }
 
     try {
-      await networkInstance.post("/auth/register", {
+      await networkInstance.post("/user/register", {
         email: form.email,
         password: form.password,
         firstName: form.firstName,
@@ -44,7 +44,7 @@ export default function RegisterPage() {
       });
       router.push("/login");
     } catch (err) {
-      console.error(err);
+      console.error("err", err);
       setError(err?.response?.data?.message || "Something went wrong.");
       setLoading(false);
     }
