@@ -16,7 +16,7 @@ export default function EventDetailPage() {
     try {
       const res = await networkInstance.get(`/event/${id}`);
       setEvent(res.data);
-      console.log("Event data:", res.data);
+      console.log("Event data:", res);
     } catch (error) {
       console.error("Error fetching orders:", error);
     }

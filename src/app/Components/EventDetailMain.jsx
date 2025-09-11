@@ -44,9 +44,9 @@ const formatDateRange = (startISO, endISO) => {
 
 function TicketRow({ t, qty, onChange }) {
   // Sold out only if organiser explicitly sets qtyAvailable to 0 or less
-  const soldOut = t.qtyAvailable !== undefined && t.qtyAvailable <= 0;
+  const soldOut = t.availableQuantity !== undefined && t.availableQuantity <= 0;
   // No per-order limit: cap only by available inventory (or infinity if not provided)
-  const max = t.qtyAvailable ?? Infinity;
+  const max = t.availableQuantity ?? Infinity;
 
   return (
     <div
@@ -62,14 +62,14 @@ function TicketRow({ t, qty, onChange }) {
             <h4 className="truncate text-base font-semibold text-white">
               {t.name}
             </h4>
-            {t.badge && (
+            {/* {t.description && (
               <span className="rounded-full bg-yellow-400 px-2 py-0.5 text-[10px] font-semibold text-black">
-                {t.badge}
+                {t.description}
               </span>
-            )}
+            )} */}
           </div>
-          {t.subtitle && (
-            <p className="mt-1 text-sm text-white/70">{t.subtitle}</p>
+          {t.description && (
+            <p className="mt-1 text-sm text-white/70">{t.description}</p>
           )}
           <p className="mt-2 text-sm text-white/60">
             {soldOut
@@ -147,7 +147,7 @@ export default function EventDetailMain({
       let count = 0;
       let countPaid = 0;
       const lines = [];
-      for (const t of event.tickets || []) {
+      for (const t of event.ticketTiers || []) {
         const q = sel[t.id] || 0;
         if (q > 0) {
           count += q;
@@ -167,7 +167,7 @@ export default function EventDetailMain({
       }
       // per-ticket fee = round(5% of unit price + 100)
       const perTicketFee = (unit) => Math.round(unit * 0.05 + 100);
-      const fees = (event.tickets || []).reduce((acc, t) => {
+      const fees = (event.ticketTiers || []).reduce((acc, t) => {
         const q = sel[t.id] || 0;
         if (q > 0 && (t.price || 0) > 0) acc += perTicketFee(t.price) * q;
         return acc;
@@ -176,8 +176,8 @@ export default function EventDetailMain({
       return { ticketSubtotal, count, countPaid, fees, grandTotal, lines };
     }, [sel, event.tickets]);
 
-  const allSoldOut = (event.tickets || []).every(
-    (t) => (t.qtyAvailable ?? 0) <= 0
+  const allSoldOut = (event.ticketTiers || []).every(
+    (t) => (t.availableQuantity ?? 0) <= 0
   );
   const handleChange = (id, v) => setSel((s) => ({ ...s, [id]: v }));
 
@@ -325,7 +325,7 @@ export default function EventDetailMain({
             </div>
 
             <div className="space-y-3">
-              {(event.tickets || []).map((t) => (
+              {(event.ticketTiers || []).map((t) => (
                 <TicketRow
                   key={t.id}
                   t={t}
@@ -356,6 +356,20 @@ export default function EventDetailMain({
               </button>
             </div>
           </div>
+          {/* <div className="mt-5 border-t border-white/10 pt-4 space-y-2">
+            <div className="flex items-center justify-between text-sm text-white/70">
+              <span>Tickets</span>
+              <span>{fmtNaira(ticketSubtotal)}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm text-white/70">
+              <span>Fees</span>
+              <span>{fmtNaira(fees)}</span>
+            </div>
+            <div className="flex items-center justify-between pt-2 text-sm font-semibold text-white">
+              <span>Total</span>
+              <span>{fmtNaira(grandTotal)}</span>
+            </div>
+          </div> */}
 
           {/* small info card */}
           <div className="rounded-2xl border border-white/10 bg-black/40 p-4 text-sm text-white/70">
