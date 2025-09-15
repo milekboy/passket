@@ -11,6 +11,7 @@ import {
 } from "@heroicons/react/24/outline";
 import NetworkInstance from "../Components/NetworkInstance";
 import DashboardLayout from "./DashboardLayout";
+import Toast from "../Components/Toast";
 
 const fmtNaira = (n) =>
   new Intl.NumberFormat("en-NG", {
@@ -101,7 +102,7 @@ export default function DashboardHome() {
             </p>
           </div>
           <Link
-            href="/dashboard/events/new"
+            href="/dashboard/create-event"
             className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-yellow-400/40 bg-yellow-400/10 px-4 py-2 text-sm font-semibold text-yellow-300 hover:bg-yellow-400/20 sm:w-auto"
           >
             <PlusCircleIcon className="h-5 w-5" />
@@ -159,17 +160,17 @@ export default function DashboardHome() {
             {/* Withdraw controls: stack on mobile */}
             <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
               <input
-                type="number"
+                // type="number"
                 min="0"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="Amount"
-                className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-white placeholder-white/40 focus:border-yellow-400 focus:ring focus:ring-yellow-400/30"
+                className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-white placeholder-white/40 focus:border-yellow-400 focus:ring focus:ring-yellow-400/30 "
               />
               <button
                 onClick={doWithdraw}
                 disabled={withdrawing || !amount}
-                className="w-full rounded-lg bg-pink-600 px-4 py-2 font-semibold text-white hover:brightness-110 disabled:opacity-50"
+                className="w-full rounded-lg  cursor-pointer bg-pink-600 px-4 py-2 font-semibold text-white hover:brightness-110 disabled:opacity-50 "
               >
                 {withdrawing ? "Processing..." : "Withdraw"}
               </button>
@@ -335,7 +336,7 @@ export default function DashboardHome() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <QuickAction
             title="Create event"
-            href="/dashboard/events/new"
+            href="/dashboard/create-event"
             desc="Set title, date, venue"
           />
           <QuickAction

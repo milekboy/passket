@@ -106,7 +106,21 @@ export default function DashboardLayout({ children }) {
               );
             })}
           </nav>
-          {/* ... */}
+          <div className="mt-6 rounded-xl border border-white/10 bg-white/5 p-4">
+            {" "}
+            <div className="text-xs uppercase tracking-wide text-white/50">
+              Role
+            </div>{" "}
+            <div className="mt-1 text-sm text-white">{user?.role}</div>{" "}
+            {/* <div className="mt-3 h-2 w-full overflow-hidden rounded bg-white/10">
+          
+              <div className="h-full w-1/3 bg-yellow-400" />{" "}
+            </div>{" "}
+            <div className="mt-2 text-xs text-white/60">
+              {" "}
+              2 / 6 active events{" "}
+            </div>{" "} */}
+          </div>
         </aside>
 
         {/* Content */}
