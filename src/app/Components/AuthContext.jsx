@@ -2,6 +2,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect } from "react";
+import LoadingTicket from "./LoadingTicket";
 
 const AuthContext = createContext({
   user: null,
@@ -13,16 +14,15 @@ const AuthContext = createContext({
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
-
-  // ── 1) Load from localStorage *only* in the browser ──
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
-    // guard just in case
-    if (typeof window === "undefined") return;
-
-    const raw = localStorage.getItem("user");
-    const tok = localStorage.getItem("token");
-    if (raw) setUser(JSON.parse(raw));
-    if (tok) setToken(tok);
+    if (typeof window !== "undefined") {
+      const raw = localStorage.getItem("user");
+      const tok = localStorage.getItem("token");
+      if (raw) setUser(JSON.parse(raw));
+      if (tok) setToken(tok);
+    }
+    setLoading(false);
   }, []);
 
   // ── 2) Sync back to localStorage whenever they change ──
@@ -45,7 +45,7 @@ export function AuthProvider({ children }) {
     setUser(null);
     setToken(null);
   };
-
+  if (loading) return <LoadingTicket />;
   return (
     <AuthContext.Provider value={{ user, token, login, logout }}>
       {children}

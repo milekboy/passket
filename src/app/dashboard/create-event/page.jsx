@@ -88,6 +88,7 @@ export default function CreateEventPage() {
       });
 
       showToast("success", "Event created successfully!");
+      router.push(`/dashboard/admin-event/${res.data.id}`);
     } catch (err) {
       console.error("❌ API Error:", err);
       showToast(
