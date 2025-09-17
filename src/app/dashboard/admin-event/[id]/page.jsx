@@ -84,15 +84,7 @@ export default function EventDetailPage() {
       setEvent(found);
       console.log("found event:", found);
       // Map ticketTiers → UI tickets shape used elsewhere in the page
-      const mappedTickets = (found.ticketTiers ?? []).map((t) => ({
-        id: t.id,
-        name: t.name ?? t.title ?? "Ticket",
-        price: Number(t.price ?? t.amount ?? t.unitPrice ?? 0),
-        qtyAvailable: t.qtyAvailable ?? t.quantityAvailable ?? t.quantity ?? 0,
-        maxPerOrder: t.maxPerOrder ?? t.maxPurchaseLimit ?? null,
-        subtitle: t.subtitle ?? "",
-        badge: t.badge ?? "",
-      }));
+      const mappedTickets = found.ticketTiers;
 
       setTickets(mappedTickets);
       console.log(tickets);
@@ -559,15 +551,30 @@ function TicketsPanel({ eventId, tickets, onChanged, onError }) {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <div className="font-semibold text-white">{t.name}</div>
+                    {!t.isAvailable && (
+                      <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-white/70">
+                        Unavailable
+                      </span>
+                    )}
                   </div>
 
-                  <div className="mt-1 text-sm text-white/70">
-                    {t.description}
-                  </div>
+                  {t.description && (
+                    <div className="mt-1 text-sm text-white/70">
+                      {t.description}
+                    </div>
+                  )}
 
-                  <div className="mt-1 text-sm text-white/80">
-                    {fmtMoney(Number(t.price ?? 0), t.currency || "NGN")} •
-                    <span className="ml-1">Max {t.soldQuantity}</span>
+                  <div className="mt-1 text-white">
+                    {fmtMoney(Number(t.price ?? 0), t.currency || "NGN")}
+                  </div>
+                  <div className="flex gap-4">
+                    {" "}
+                    <div className="text-white/60">
+                      Total Created: {t.maxQuantity}
+                    </div>
+                    <div className=" text-white/60">
+                      Currently Available: {t.availableQuantity}
+                    </div>
                   </div>
                 </div>
 
@@ -597,7 +604,7 @@ function PublishPanel({ event, tickets, onPublished, onError }) {
   const api = NetworkInstance();
   const [confirm, setConfirm] = useState(false);
   const [publishing, setPublishing] = useState(false);
-
+  const { token } = useAuth();
   const canPublish = tickets && tickets.length > 0;
 
   const doPublish = async () => {
@@ -606,11 +613,18 @@ function PublishPanel({ event, tickets, onPublished, onError }) {
 
     try {
       setPublishing(true);
-      // Use your actual publish endpoint; adjust method as needed (POST/PATCH)
-      await api.post(`/events/${event.id}/publish`);
+
+      await api.post(
+        `/event/${event.id}/publish`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       onPublished?.();
     } catch (e) {
       console.error(e);
+
       onError?.(e.response.data.error || "Failed to publish event.");
     } finally {
       setPublishing(false);
@@ -627,7 +641,7 @@ function PublishPanel({ event, tickets, onPublished, onError }) {
             {event.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={event.imageUrl}
+                src="https://res.cloudinary.com/dbpjskran/image/upload/v1754989530/event_nrufbc.jpg"
                 alt={event.title}
                 className="h-full w-full object-cover"
               />
@@ -655,7 +669,7 @@ function PublishPanel({ event, tickets, onPublished, onError }) {
                 {tickets.map((t) => (
                   <li key={t.id}>
                     {t.name} — {t.price > 0 ? fmtNaira(t.price) : "Free"} (
-                    {t.qtyAvailable} available)
+                    {t.availableQuantity} available)
                   </li>
                 ))}
               </ul>
