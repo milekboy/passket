@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   PlusCircleIcon,
   ArrowUpRightIcon,
@@ -12,7 +12,7 @@ import {
 import NetworkInstance from "../Components/NetworkInstance";
 import DashboardLayout from "./DashboardLayout";
 import Toast from "../Components/Toast";
-
+import { useAuth } from "@/app/Components/AuthContext";
 const fmtNaira = (n) =>
   new Intl.NumberFormat("en-NG", {
     style: "currency",
@@ -20,38 +20,47 @@ const fmtNaira = (n) =>
     maximumFractionDigits: 0,
   }).format(n);
 
-// --- demo data to start ---
-const demoEvents = [
-  {
-    id: "ev1",
-    title: "Lagos Tech Fest",
-    date: "Oct 4",
-    status: "Draft",
-    ticketsSold: 0,
-    revenue: 0,
-  },
-  {
-    id: "ev2",
-    title: "Afrobeats Night",
-    date: "Nov 12",
-    status: "Published",
-    ticketsSold: 312,
-    revenue: 2480000,
-  },
-  {
-    id: "ev3",
-    title: "Comedy Unplugged",
-    date: "Dec 03",
-    status: "Published",
-    ticketsSold: 127,
-    revenue: 890000,
-  },
-];
+const formatDate = (iso) => {
+  if (!iso) return "—";
+  try {
+    const d = new Date(iso);
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(d);
+  } catch {
+    return "—";
+  }
+};
 
 export default function DashboardHome() {
-  const [events] = useState(demoEvents);
+  const [events, setEvents] = useState([]); // not undefined
+  const api = NetworkInstance();
+  const { token } = useAuth();
   const [withdrawing, setWithdrawing] = useState(false);
   const [amount, setAmount] = useState("");
+  const [toast, showToast] = useState({ type: "", message: "" });
+  const fetchEvents = async () => {
+    try {
+      const res = await api.get("/Event/mine", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const list =
+        res?.data?.events ??
+        res?.data?.data ??
+        (Array.isArray(res?.data) ? res.data : []) ??
+        [];
+      setEvents(list);
+    } catch (e) {
+      console.error(e);
+      showToast("error", "Failed to load events.");
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
 
   const stats = useMemo(() => {
     const published = events.filter((e) => e.status === "Published");
@@ -87,7 +96,18 @@ export default function DashboardHome() {
       setWithdrawing(false);
     }
   };
-
+  const deleteEvent = async (id) => {
+    if (!confirm("Delete this event?")) return;
+    try {
+      await api.delete(`/event/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      showToast("success", "Event deleted.");
+    } catch (e) {
+      console.error(e);
+      showToast("error", `${e.response.data.error}`);
+    }
+  };
   return (
     <DashboardLayout>
       <section className="space-y-8">
@@ -126,13 +146,13 @@ export default function DashboardHome() {
           />
           <Stat
             label="Fees paid"
-            value={fmtNaira(stats.fees)}
+            value={fmtNaira(0)}
             chip="5% + ₦100"
             icon={<ArrowDownRightIcon className="h-5 w-5" />}
           />
           <Stat
             label="Net balance"
-            value={fmtNaira(stats.net)}
+            value={fmtNaira(0)}
             chip="Available"
             icon={<CheckCircleIcon className="h-5 w-5" />}
           />
@@ -151,7 +171,7 @@ export default function DashboardHome() {
               </span>
             </div>
             <div className="mt-2 text-3xl font-extrabold text-yellow-400">
-              {fmtNaira(currentBalance)}
+              {fmtNaira(10000)}
             </div>
             <p className="mt-1 text-sm text-white/60">
               After fees. Updates in real-time after sales.
@@ -188,7 +208,7 @@ export default function DashboardHome() {
                 Recent Events
               </h3>
               <Link
-                href="/dashboard/events"
+                href="/dashboard/admin-all-events"
                 className="text-sm text-yellow-300 hover:underline"
               >
                 View all
@@ -203,13 +223,22 @@ export default function DashboardHome() {
                   className="rounded-xl border border-white/10 bg-black/40 p-4"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="text-white font-semibold">{ev.title}</div>
+                    <div className="min-w-0">
+                      <div className="text-white font-semibold line-clamp-1">
+                        {ev.title}
+                      </div>
                       <div className="mt-1 text-sm text-white/60">
-                        {ev.date}
+                        {formatDate(ev.startDate)}
+                        {ev.endDate ? ` → ${formatDate(ev.endDate)}` : ""}
                       </div>
                       <div className="mt-1 text-sm text-white/70">
-                        {fmtNaira(ev.revenue)} • {ev.ticketsSold} sold
+                        {ev.location || "—"}
+                      </div>
+                      <div className="mt-1 text-sm text-white/70">
+                        Tickets:{" "}
+                        {Array.isArray(ev.ticketTiers)
+                          ? ev.ticketTiers.length
+                          : 0}
                       </div>
                     </div>
                     <span
@@ -219,61 +248,81 @@ export default function DashboardHome() {
                           : "bg-white/10 text-white/70"
                       }`}
                     >
-                      {ev.status}
+                      {ev.status || "Draft"}
                     </span>
                   </div>
 
                   <div className="mt-3 flex flex-wrap gap-2">
                     <Link
-                      href={`/dashboard/events/${ev.id}/edit`}
-                      className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:bg-white/10"
+                      href={`/dashboard/events/${ev.id}`}
+                      className="rounded-lg cursor-pointer border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:bg-white/10"
                     >
-                      Edit
+                      Manage
                     </Link>
                     {ev.status !== "Published" ? (
-                      <Link
-                        href={`/dashboard/events/${ev.id}/publish`}
-                        className="rounded-lg border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-xs text-yellow-300 hover:bg-yellow-400/20"
-                      >
+                      <button className="rounded-lg cursor-pointer border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-xs text-yellow-300 hover:bg-yellow-400/20">
                         Publish
-                      </Link>
+                      </button>
                     ) : (
                       <Link
-                        href={`/dashboard/events/${ev.id}/tickets`}
-                        className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:bg-white/10"
+                        href={`/dashboard/events/${ev.id}`}
+                        className="rounded-lg cursor-pointer border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:bg-white/10"
                       >
-                        Manage tickets
+                        Tickets
                       </Link>
                     )}
-                    <Link
-                      href={`/dashboard/events/${ev.id}/delete`}
-                      className="rounded-lg border border-red-400/30 bg-red-400/10 px-3 py-1.5 text-xs text-red-300 hover:bg-red-400/20"
+                    <button
+                      onClick={() => deleteEvent(ev.id)}
+                      className="rounded-lg cursor-pointer border border-red-400/30 bg-red-400/10 px-3 py-1.5 text-xs text-red-300 hover:bg-red-400/20 "
                     >
                       Delete
-                    </Link>
+                    </button>
                   </div>
                 </li>
               ))}
+              {events.length === 0 && (
+                <li className="rounded-xl border border-white/10 bg-black/40 p-6 text-center text-white/60">
+                  No events yet. Create your first event!
+                </li>
+              )}
             </ul>
 
             {/* Desktop: table */}
-            <div className="hidden md:block overflow-x-auto overflow-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+            <div className="hidden md:block overflow-x-auto ">
               <table className="min-w-full text-left text-sm text-white/80">
                 <thead className="text-xs uppercase text-white/50">
                   <tr>
                     <th className="py-2 pr-4">Event</th>
-                    <th className="py-2 pr-4">Date</th>
+                    <th className="py-2 pr-4">Dates</th>
+                    <th className="py-2 pr-4">Location</th>
+                    <th className="py-2 pr-4">Tickets</th>
                     <th className="py-2 pr-4">Status</th>
-                    <th className="py-2 pr-4">Tickets sold</th>
-                    <th className="py-2 pr-4">Revenue</th>
                     <th className="py-2 pr-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {events.map((ev) => (
                     <tr key={ev.id} className="border-t border-white/10">
-                      <td className="py-3 pr-4">{ev.title}</td>
-                      <td className="py-3 pr-4">{ev.date}</td>
+                      <td className="py-3 pr-4 max-w-[260px]">
+                        <div className="font-semibold text-white line-clamp-1">
+                          {ev.title}
+                        </div>
+                        <div className="text-xs text-white/50 line-clamp-1">
+                          {ev.description}
+                        </div>
+                      </td>
+                      <td className="py-3 pr-4 whitespace-nowrap">
+                        {formatDate(ev.startDate)}
+                        {ev.endDate ? ` → ${formatDate(ev.endDate)}` : ""}
+                      </td>
+                      <td className="py-3 pr-4 max-w-[220px] truncate">
+                        {ev.location || "—"}
+                      </td>
+                      <td className="py-3 pr-4">
+                        {Array.isArray(ev.ticketTiers)
+                          ? ev.ticketTiers.length
+                          : 0}
+                      </td>
                       <td className="py-3 pr-4">
                         <span
                           className={`rounded-full px-2 py-0.5 text-[11px] ${
@@ -282,52 +331,48 @@ export default function DashboardHome() {
                               : "bg-white/10 text-white/70"
                           }`}
                         >
-                          {ev.status}
+                          {ev.status || "Draft"}
                         </span>
                       </td>
-                      <td className="py-3 pr-4">{ev.ticketsSold}</td>
-                      <td className="py-3 pr-4">{fmtNaira(ev.revenue)}</td>
-                      <td className="py-3 pl-4 text-right">
+                      <td className="py-3 pl-4">
                         <div className="flex justify-end gap-2">
                           <Link
-                            href={`/dashboard/events/${ev.id}/edit`}
-                            className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:bg-white/10"
+                            href={`/dashboard/admin-event/${ev.id}`}
+                            className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:bg-white/10 cursor-pointer"
                           >
-                            Edit
+                            Manage
                           </Link>
                           {ev.status !== "Published" ? (
-                            <Link
-                              href={`/dashboard/events/${ev.id}/publish`}
-                              className="rounded-lg border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-xs text-yellow-300 hover:bg-yellow-400/20"
-                            >
+                            <button className="rounded-lg border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-xs text-yellow-300 hover:bg-yellow-400/20 cursor-pointer">
                               Publish
-                            </Link>
+                            </button>
                           ) : (
-                            <Link
-                              href={`/dashboard/events/${ev.id}/tickets`}
-                              className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:bg-white/10"
-                            >
-                              Manage
-                            </Link>
+                            <button className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:bg-white/10 cursor-pointer">
+                              Tickets
+                            </button>
                           )}
-                          <Link
-                            href={`/dashboard/events/${ev.id}/delete`}
-                            className="rounded-lg border border-red-400/30 bg-red-400/10 px-3 py-1.5 text-xs text-red-300 hover:bg-red-400/20"
+                          <button
+                            onClick={() => deleteEvent(ev.id)}
+                            className="rounded-lg border border-red-400/30 bg-red-400/10 px-3 py-1.5 text-xs text-red-300 hover:bg-red-400/20 cursor-pointer"
                           >
                             Delete
-                          </Link>
+                          </button>
                         </div>
                       </td>
                     </tr>
                   ))}
+                  {events.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="py-10 text-center text-white/60"
+                      >
+                        No events yet. Create your first event!
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
-
-              {events.length === 0 && (
-                <div className="py-10 text-center text-white/60">
-                  No events yet. Create your first event!
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -355,6 +400,11 @@ export default function DashboardHome() {
             desc="Verify entries at the gate"
           />
         </div>
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast({ type: "", message: "" })}
+        />
       </section>
     </DashboardLayout>
   );

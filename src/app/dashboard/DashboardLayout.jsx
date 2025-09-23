@@ -32,7 +32,7 @@ export default function DashboardLayout({ children }) {
   };
   const nav = [
     { name: "Overview", href: "/dashboard", icon: Squares2X2Icon },
-    { name: "Events", href: "/dashboard/events", icon: CalendarIcon },
+    { name: "Events", href: "/dashboard/admin-all-events", icon: CalendarIcon },
     { name: "Tickets", href: "/dashboard/tickets", icon: TicketIcon },
     { name: "Settings", href: "/dashboard/settings", icon: Cog6ToothIcon },
   ];
@@ -77,7 +77,7 @@ export default function DashboardLayout({ children }) {
       <div className="mx-auto flex max-w-7xl">
         {/* Sidebar */}
         <aside
-          className={`fixed left-0 top-[56px] z-30 h-[calc(100vh-56px)] w-72 transform border-r border-white/10 bg-black/50 p-4 backdrop-blur-md transition-transform lg:static lg:translate-x-0 ${
+          className={`fixed left-0 top-[56px] z-30 h-[calc(100vh-56px)] w-72 transform border-r border-white/10 bg-black/50 p-4 backdrop-blur-md transition-transform lg:static lg:translate-x-0 lg:overflow-hidden ${
             open ? "translate-x-0" : "-translate-x-full"
           }`}
         >

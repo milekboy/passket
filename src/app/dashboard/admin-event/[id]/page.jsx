@@ -190,7 +190,11 @@ export default function EventDetailPage() {
 
         {/* Panels */}
         {tab === "overview" && (
-          <OverviewPanel event={event} tickets={tickets} />
+          <OverviewPanel
+            event={event}
+            tickets={tickets}
+            setTab={(t) => setTab(t)}
+          />
         )}
 
         {tab === "tickets" && (
@@ -200,6 +204,7 @@ export default function EventDetailPage() {
             onChanged={async (msg) => {
               await fetchAll();
               if (msg) showToast("success", msg);
+              setTab("tickets"); // ✅ ensure we’re on the Tickets tab after add/delete
             }}
             onError={(msg) => showToast("error", msg)}
           />
@@ -247,8 +252,9 @@ function TabButton({ active, onClick, children, disabled, title }) {
   );
 }
 
-/* Overview */
-function OverviewPanel({ event, tickets }) {
+function OverviewPanel({ event, tickets, setTab }) {
+  const hasTickets = Array.isArray(tickets) && tickets.length > 0;
+
   return (
     <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
       {/* Left: Event card */}
@@ -284,7 +290,7 @@ function OverviewPanel({ event, tickets }) {
         </div>
       </div>
 
-      {/* Right: Quick tips */}
+      {/* Right: Next steps */}
       <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
         <h4 className="text-white font-semibold">Next steps</h4>
         <ul className="mt-3 list-disc pl-4 text-sm text-white/70 space-y-1">
@@ -292,21 +298,34 @@ function OverviewPanel({ event, tickets }) {
           <li>Double-check date, venue, and image</li>
           <li>Publish when you’re ready — event goes live instantly</li>
         </ul>
+
         <div className="mt-4 flex flex-wrap gap-2">
-          <Link
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              const btn = document.getElementById("tab-tickets-btn");
-              btn?.click();
-            }}
-            className="rounded-lg border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-sm text-yellow-300 hover:bg-yellow-400/20"
+          {/* Always offer Create Tickets */}
+          <button
+            type="button"
+            onClick={() => setTab("tickets")}
+            className="rounded-lg border cursor-pointer border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-sm text-yellow-300 hover:bg-yellow-400/20"
           >
             Create tickets
-          </Link>
-          <span className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white/70">
-            Publish is locked until tickets exist
-          </span>
+          </button>
+
+          {event.isPublished ? (
+            <span className="rounded-lg border cursor-not-allowed border-white/10 bg-white/5 px-3 py-1.5 text-sm text-green-300/70">
+              This event has been published
+            </span>
+          ) : hasTickets ? (
+            <button
+              type="button"
+              onClick={() => setTab("publish")}
+              className="rounded-lg border cursor-pointer border-emerald-400/40 bg-emerald-400/10 px-3 py-1.5 text-sm text-emerald-200 hover:bg-emerald-400/20"
+            >
+              Go to publish
+            </button>
+          ) : (
+            <span className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white/70">
+              Publish is locked until tickets exist
+            </span>
+          )}
         </div>
       </div>
     </div>
@@ -703,14 +722,19 @@ function PublishPanel({ event, tickets, onPublished, onError }) {
             I confirm all event details and ticket information are correct.
           </span>
         </label>
-
-        <button
-          onClick={doPublish}
-          disabled={!canPublish || publishing || !confirm}
-          className="mt-4 w-full cursor-pointer rounded-lg bg-gradient-to-r from-pink-600 via-yellow-400 to-pink-600 px-4 py-2 font-semibold text-black shadow-md transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {publishing ? "Publishing…" : "Publish now"}
-        </button>
+        {event.isPublished ? (
+          <div className="mt-4 rounded-xl border text-center border-white/10 bg-white/5 p-4 text-sm text-green-400">
+            This event has already been published.
+          </div>
+        ) : (
+          <button
+            onClick={doPublish}
+            disabled={!canPublish || publishing || !confirm}
+            className="mt-4 w-full cursor-pointer rounded-lg bg-gradient-to-r from-pink-600 via-yellow-400 to-pink-600 px-4 py-2 font-semibold text-black shadow-md transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {publishing ? "Publishing…" : "Publish now"}
+          </button>
+        )}
 
         <p className="mt-2 text-xs text-white/50">
           You can unpublish from the Events list if needed.
