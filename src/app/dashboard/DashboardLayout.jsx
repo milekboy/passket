@@ -33,8 +33,7 @@ export default function DashboardLayout({ children }) {
   const nav = [
     { name: "Overview", href: "/dashboard", icon: Squares2X2Icon },
     { name: "Events", href: "/dashboard/admin-all-events", icon: CalendarIcon },
-    { name: "Tickets", href: "/dashboard/tickets", icon: TicketIcon },
-    { name: "Settings", href: "/dashboard/settings", icon: Cog6ToothIcon },
+    { name: "Scan Tickets", href: "/dashboard/tickets", icon: TicketIcon },
   ];
 
   return (
