@@ -87,12 +87,12 @@ export default function Header({
             >
               Faqs
             </li>
-            <li
+            {/* <li
               className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500 tracking-wide cursor-pointer"
               onClick={scrollToContact}
             >
               Contact
-            </li>
+            </li> */}
           </ul>
 
           {/* Desktop Auth */}
@@ -187,14 +187,14 @@ export default function Header({
             >
               Faqs
             </li>
-            <li
+            {/* <li
               onClick={() => {
                 closeMenu();
                 scrollToContact();
               }}
             >
               Contact
-            </li>
+            </li> */}
             <li>
               <Link href="/login" onClick={closeMenu}>
                 Log In

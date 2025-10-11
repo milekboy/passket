@@ -165,7 +165,7 @@ export default function CategoryMarquee({
             <button
               key={`${cat.id}-${i}`}
               onClick={() => onSelect?.(selected ? null : cat.id)}
-              className={`group relative flex w-[120px] flex-col items-center rounded-2xl border bg-white/5 p-3 backdrop-blur-md transition hover:bg-white/10
+              className={`group cursor-pointer relative flex w-[120px] flex-col items-center rounded-2xl border bg-white/5 p-3 backdrop-blur-md transition hover:bg-white/10
                 ${
                   selected
                     ? "border-yellow-400/50 ring-2 ring-yellow-300/40"
@@ -174,7 +174,7 @@ export default function CategoryMarquee({
               aria-pressed={selected}
               title={cat.name}
             >
-              <div className="relative mb-2 h-20 w-20 overflow-hidden rounded-xl border border-white/10 bg-black/40">
+              <div className="relative  mb-2 h-20 w-20 overflow-hidden rounded-xl border border-white/10 bg-black/40">
                 {cat.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img

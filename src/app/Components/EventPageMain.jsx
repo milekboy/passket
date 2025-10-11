@@ -5,23 +5,6 @@ import CategoryMarquee from "./CategoryMarquee";
 import EventGrid from "./EventGrid";
 
 // Example icons (optional) for categories without images
-function MusicIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M9 19a2 2 0 11-4 0 2 2 0 014 0zM17 17a2 2 0 11-4 0 2 2 0 014 0z"
-        stroke="#FACC15"
-        strokeWidth="2"
-      />
-      <path
-        d="M9 17V5l10-2v12"
-        stroke="#FACC15"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
 
 export default function EventPageMain({
   categories = [
@@ -80,12 +63,13 @@ export default function EventPageMain({
 
   const filtered = useMemo(() => {
     if (!activeCat || activeCat === "all") return events;
-    // Accept either a single 'category' field or an array 'categories' on each event
-    return events.filter((ev) =>
-      Array.isArray(ev.categories)
-        ? ev.categories.includes(activeCat)
-        : ev.category === activeCat
-    );
+
+    return events.filter((ev) => {
+      const evCats = Array.isArray(ev.categories)
+        ? ev.categories.map((c) => c.toLowerCase())
+        : [ev.category?.toLowerCase()];
+      return evCats.includes(activeCat?.toLowerCase());
+    });
   }, [events, activeCat]);
 
   return (
@@ -93,7 +77,7 @@ export default function EventPageMain({
       {/* Categories loop */}
       <CategoryMarquee
         categories={categories}
-        activeId={events}
+        activeId={activeCat}
         onSelect={(id) => setActiveCat(id)}
         className="mx-auto max-w-7xl"
       />
