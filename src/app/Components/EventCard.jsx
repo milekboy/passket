@@ -20,7 +20,10 @@ export default function EventCard({ ev }) {
     <article className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5">
       <div className="relative h-44 w-full">
         <Image
-          src="https://images.unsplash.com/photo-1506157786151-b8491531f063?q=80&w=1920&auto=format&fit=crop"
+          src={
+            ev.imageUrl ||
+            "https://res.cloudinary.com/dbpjskran/image/upload/v1754989530/event_nrufbc.jpg"
+          }
           alt={`${ev.title} poster`}
           fill
           className="object-cover"

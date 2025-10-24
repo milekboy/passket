@@ -227,7 +227,10 @@ export default function EventDetailMain({
           {/* Cover / poster */}
           <div className="relative aspect-[16/9] w-full overflow-hidden rounded-3xl border border-white/10 bg-white/5">
             <Image
-              src="https://res.cloudinary.com/dbpjskran/image/upload/v1754989530/event_nrufbc.jpg"
+              src={
+                event.imageUrl ||
+                "https://res.cloudinary.com/dbpjskran/image/upload/v1754989530/event_nrufbc.jpg"
+              }
               alt="event cover image"
               fill
               className="object-cover"

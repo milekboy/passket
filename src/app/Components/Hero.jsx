@@ -48,7 +48,10 @@ export default function HeroCarousel({
             className={`absolute inset-0 transition-opacity duration-700 ease-out
               ${i === index ? "opacity-100" : "opacity-0"}`}
             style={{
-              backgroundImage: `url(${s.image})`,
+              backgroundImage: `url(${
+                s.image ||
+                "https://res.cloudinary.com/dbpjskran/image/upload/v1754989530/event_nrufbc.jpg"
+              })`,
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}

@@ -262,7 +262,10 @@ function OverviewPanel({ event, tickets, setTab }) {
         <div className="flex flex-col gap-4 sm:flex-row">
           <div className="relative h-36 w-full overflow-hidden rounded-xl border border-white/10 bg-black/40 sm:w-56">
             <img
-              src="https://res.cloudinary.com/dbpjskran/image/upload/v1754989530/event_nrufbc.jpg"
+              src={
+                event.imageUrl ||
+                "https://res.cloudinary.com/dbpjskran/image/upload/v1754989530/event_nrufbc.jpg"
+              }
               alt={event.title}
               className="h-full w-full object-cover"
             />
@@ -660,7 +663,10 @@ function PublishPanel({ event, tickets, onPublished, onError }) {
             {event.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src="https://res.cloudinary.com/dbpjskran/image/upload/v1754989530/event_nrufbc.jpg"
+                src={
+                  event.imageUrl ||
+                  "https://res.cloudinary.com/dbpjskran/image/upload/v1754989530/event_nrufbc.jpg"
+                }
                 alt={event.title}
                 className="h-full w-full object-cover"
               />

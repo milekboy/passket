@@ -26,3 +26,7 @@ body {
   -ms-overflow-style: none; /* IE and old Edge */
   scrollbar-width: none; /* Firefox */
 }
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(64%) sepia(90%) saturate(500%) hue-rotate(5deg);
+  cursor: pointer;
+}

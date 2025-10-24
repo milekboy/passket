@@ -103,7 +103,10 @@ export default function TrendingRail({ events = [] }) {
               <span className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-white/10 transition group-hover:ring-pink-500/60" />
               <div className="relative h-44 w-full">
                 <Image
-                  src="https://res.cloudinary.com/dbpjskran/image/upload/v1754989530/event_nrufbc.jpg"
+                  src={
+                    ev.imageUrl ||
+                    "https://res.cloudinary.com/dbpjskran/image/upload/v1754989530/event_nrufbc.jpg"
+                  }
                   alt={`${ev.title} poster`}
                   fill
                   className="object-cover"
@@ -146,7 +149,7 @@ export default function TrendingRail({ events = [] }) {
                   <span className="text-sm text-white/80">
                     From{" "}
                     <span className="font-semibold text-white">
-                      ₦{Number(ev.priceFrom).toLocaleString()}
+                      ₦{Number(ev.minimumPrice).toLocaleString()}
                     </span>
                   </span>
                   <Link

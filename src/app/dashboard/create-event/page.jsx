@@ -21,7 +21,7 @@ const categories = [
 export default function CreateEventPage() {
   const router = useRouter();
   const api = NetworkInstance();
-  const { token, logout } = useAuth();
+  const { token } = useAuth();
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -57,7 +57,33 @@ export default function CreateEventPage() {
     setLoading(true);
 
     try {
-      // build payload
+      let imageUrl = "";
+
+      // ✅ 1. Upload image to Cloudinary if selected
+      if (form.image) {
+        const data = new FormData();
+        data.append("file", form.image);
+        data.append("upload_preset", "events"); // your preset name
+        data.append("cloud_name", "dbpjskran"); // your Cloudinary cloud name
+
+        const uploadRes = await fetch(
+          "https://api.cloudinary.com/v1_1/dbpjskran/image/upload",
+          {
+            method: "POST",
+            body: data,
+          }
+        );
+
+        const uploadData = await uploadRes.json();
+
+        if (uploadData.secure_url) {
+          imageUrl = uploadData.secure_url;
+        } else {
+          throw new Error("Image upload failed");
+        }
+      }
+
+      // ✅ 2. Send event data to your backend
       const payload = {
         title: form.title,
         description: form.description,
@@ -68,15 +94,15 @@ export default function CreateEventPage() {
         isPublic: true,
         isPublished: false,
         status: "Draft",
+        imageUrl,
       };
 
       const res = await api.post("/Event", payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("✅ Event created:", res);
+      console.log("✅ Event created:", res.data);
 
-      // clear form fields
       setForm({
         title: "",
         description: "",
