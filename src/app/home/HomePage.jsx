@@ -52,7 +52,7 @@ export default function HomePage() {
       setEvents(allEvents);
 
       // ✅ Create slides from first 3 events
-      const heroSlides = allEvents.slice(0, 3).map((event) => ({
+      const heroSlides = allEvents.slice(2, 5).map((event) => ({
         image: event.imageUrl,
         kicker: event.category || "Featured Event",
         title: event.title,

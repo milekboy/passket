@@ -1,4 +1,4 @@
-"use client"; // components/HeroCarousel.jsx""
+"use client";
 import { useEffect, useRef, useState, useCallback } from "react";
 
 const SLIDE_INTERVAL = 6000;
@@ -40,29 +40,35 @@ export default function HeroCarousel({
       onMouseEnter={pause}
       onMouseLeave={resume}
     >
-      {/* Slides */}
+      {/* Slides container */}
       <div className="absolute inset-0">
         {slides.map((s, i) => (
           <div
             key={i}
-            className={`absolute inset-0 transition-opacity duration-700 ease-out
-              ${i === index ? "opacity-100" : "opacity-0"}`}
-            style={{
-              backgroundImage: `url(${
-                s.image ||
-                "https://res.cloudinary.com/dbpjskran/image/upload/v1754989530/event_nrufbc.jpg"
-              })`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-            aria-hidden={i !== index}
-          />
+            className={`absolute inset-0 transition-opacity duration-700 ease-out ${
+              i === index ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            {/* ✅ Background Image */}
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: `url(${
+                  s.image ||
+                  "https://res.cloudinary.com/dbpjskran/image/upload/v1754989530/event_nrufbc.jpg"
+                })`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            />
+
+            {/* ✅ Dark Overlay (sits above image but below text) */}
+            <div className="absolute inset-0 bg-black/95" />
+          </div>
         ))}
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-black/60" />
       </div>
 
-      {/* Content */}
+      {/* ✅ Text Content */}
       <div className="relative z-10 flex items-center justify-center h-full px-6">
         <div className="max-w-4xl text-center text-white">
           {active.kicker && (
@@ -108,20 +114,20 @@ export default function HeroCarousel({
       <button
         aria-label="Previous slide"
         onClick={() => go(-1)}
-        className="absolute left-3 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur px-3 py-2 text-white"
+        className="absolute left-3 top-1/2 -translate-y-1/2 z-20 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur px-3 py-2 text-white"
       >
         ‹
       </button>
       <button
         aria-label="Next slide"
         onClick={() => go(1)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur px-3 py-2 text-white"
+        className="absolute right-3 top-1/2 -translate-y-1/2 z-20 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur px-3 py-2 text-white"
       >
         ›
       </button>
 
       {/* Dots */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
         {slides.map((_, i) => (
           <button
             key={i}

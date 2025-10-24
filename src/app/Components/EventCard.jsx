@@ -65,7 +65,7 @@ export default function EventCard({ ev }) {
           <span className="text-sm text-white/80">
             From{" "}
             <span className="font-semibold text-white">
-              ₦{Number(ev.priceFrom).toLocaleString()}
+              ₦{Number(ev.minimumPrice).toLocaleString()}
             </span>
           </span>
           <Link

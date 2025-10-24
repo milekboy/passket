@@ -117,7 +117,10 @@ export default function AdminEventsPage() {
                 {/* Image */}
                 <div className="relative h-36 w-full overflow-hidden rounded-lg border border-white/10 bg-black/40">
                   <img
-                    src="https://res.cloudinary.com/dbpjskran/image/upload/v1754989530/event_nrufbc.jpg"
+                    src={
+                      ev.imageUrl ||
+                      "https://res.cloudinary.com/dbpjskran/image/upload/v1754989530/event_nrufbc.jpg"
+                    }
                     alt="image"
                     className="h-full w-full object-cover"
                   />

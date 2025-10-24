@@ -51,7 +51,7 @@ export default function DashboardHome() {
         res?.data?.data ??
         (Array.isArray(res?.data) ? res.data : []) ??
         [];
-      setEvents(list);
+      setEvents(list.slice(0, 4));
     } catch (e) {
       console.error(e);
       showToast("error", "Failed to load events.");
