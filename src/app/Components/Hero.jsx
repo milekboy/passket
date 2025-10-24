@@ -63,7 +63,7 @@ export default function HeroCarousel({
             />
 
             {/* ✅ Dark Overlay (sits above image but below text) */}
-            <div className="absolute inset-0 bg-black/95" />
+            <div className="absolute inset-0 bg-black/75" />
           </div>
         ))}
       </div>
