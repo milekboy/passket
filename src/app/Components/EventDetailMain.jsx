@@ -4,6 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import OrderSummary from "./OrderSummary";
+import CheckoutForm from "./CheckoutForm";
+import Toast from "./Toast";
+
+import NetworkInstance from "./NetworkInstance";
+import { useAuth } from "./AuthContext";
+import LoadingTicket from "./LoadingTicket";
 
 /* Utils */
 const fmtNaira = (n) =>
@@ -125,9 +132,14 @@ export default function EventDetailMain({
   onBeginCheckout, // optional callback(selection, total)
 }) {
   const router = useRouter();
+  const api = NetworkInstance();
+  const { token } = useAuth();
 
   // selection state { [ticketId]: qty }
   const [sel, setSel] = useState({});
+  const [checkoutStep, setCheckoutStep] = useState("tickets"); // "tickets" | "checkout"
+  const [isLoading, setIsLoading] = useState(false);
+  const [toast, setToast] = useState(null);
   useEffect(() => {
     if (!event?.id) return;
     const key = `checkout:${event.id}`;
@@ -182,26 +194,60 @@ export default function EventDetailMain({
   const handleChange = (id, v) => setSel((s) => ({ ...s, [id]: v }));
 
   const beginCheckout = () => {
-    const payload = {
-      eventId: event.id,
-      eventTitle: event.title,
-      venueName: event.venueName,
-      startsAt: event.startDate,
-      selection: sel,
-      lines,
-      ticketSubtotal,
-      fees,
-      grandTotal,
-      currency: "NGN",
-      feeFormula: "5% + ₦100 per paid ticket",
-      countPaid,
-    };
+    setCheckoutStep("checkout");
+  };
+
+  const handleCheckoutSubmit = async (formData) => {
+    if (!lines.length) {
+      setToast({ type: "error", message: "No tickets selected" });
+      return;
+    }
+    const primaryLine = lines[0];
+    setIsLoading(true);
     try {
-      sessionStorage.setItem(`checkout:${event.id}`, JSON.stringify(payload));
-    } catch {}
-    if (typeof onBeginCheckout === "function")
-      onBeginCheckout(payload, grandTotal);
-    else router.push(`/checkout/${event.id}`);
+      const payload = {
+        userId: "ab95331a-9b70-4723-b80e-6883fe5d0e64",
+        eventId: event.id,
+        ticketTierId: primaryLine.id,
+        quantity: primaryLine.qty, // Note: This might be inaccurate if user bought multiple tiers. 
+        amount: grandTotal, 
+        currency: "NGN",
+        customerEmail: formData.email,
+        customerName: formData.fullName,
+        customerPhone: formData.phone,
+        successUrl: typeof window !== "undefined" ? `${window.location.origin}/payment/success` : "",
+        cancelUrl: typeof window !== "undefined" ? `${window.location.origin}/payment/cancel` : "",
+      };
+  console.log(payload)
+      const res = await api.post("/payment/create-session", payload, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      const data = res.data;
+
+      // Axios throws on 4xx/5xx usually, but if not:
+      if (!data) {
+        throw new Error("Failed to create payment session");
+      }
+
+      setToast({ type: "success", message: "Redirecting to payment..." });
+      
+      // Redirect to the URL provided by backend
+      if (data.redirectUrl) {
+         window.location.href = data.redirectUrl;
+      } else {
+         throw new Error("No redirect URL returned");
+      }
+      
+    } catch (err) {
+      console.error(err);
+    
+      setToast({ 
+        type: "error", 
+        message: err.response?.data?.message || err.message || "Something went wrong" 
+      });
+      setIsLoading(false);
+    }
   };
 
   const share = async () => {
@@ -221,6 +267,13 @@ export default function EventDetailMain({
   return (
     <section className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6">
       {/* top layout */}
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
       <div className="grid gap-8 lg:grid-cols-[1.25fr_1fr]">
         {/* LEFT — media + meta + description */}
         <div>
@@ -317,48 +370,63 @@ export default function EventDetailMain({
 
         {/* RIGHT — ticket selector & order summary */}
         <aside className="space-y-4">
-          <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">Tickets</h3>
-              {allSoldOut && (
-                <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/70">
-                  All sold out
-                </span>
-              )}
-            </div>
-
-            <div className="space-y-3">
-              {(event.ticketTiers || []).map((t) => (
-                <TicketRow
-                  key={t.id}
-                  t={t}
-                  qty={sel[t.id] || 0}
-                  onChange={(v) => handleChange(t.id, v)}
-                />
-              ))}
-            </div>
-
-            {/* summary */}
-            <div className="mt-5 border-t border-white/10 pt-4 space-y-2">
-              <div className="flex items-center justify-between pt-2 text-sm font-semibold text-white">
-                <span>Total</span>
-                <span>{fmtNaira(grandTotal)}</span>
+          {checkoutStep === "tickets" ? (
+            <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-white">Tickets</h3>
+                {allSoldOut && (
+                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/70">
+                    All sold out
+                  </span>
+                )}
               </div>
 
-              <p className="text-[12px] text-white/50">
-                Fees apply only to paid tickets. Free tickets incur no fees.
-              </p>
+              <div className="space-y-3">
+                {(event.ticketTiers || []).map((t) => (
+                  <TicketRow
+                    key={t.id}
+                    t={t}
+                    qty={sel[t.id] || 0}
+                    onChange={(v) => handleChange(t.id, v)}
+                  />
+                ))}
+              </div>
 
-              <button
-                onClick={beginCheckout}
-                disabled={count === 0}
-                className="group relative mt-2 w-full cursor-pointer rounded-xl bg-pink-600 px-5 py-3 font-semibold text-white transition hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span className="absolute inset-0 -z-10 bg-gradient-to-r from-pink-600 via-fuchsia-600 to-pink-600 opacity-0 blur-xl transition-opacity duration-300 group-hover:opacity-60" />
-                {count === 0 ? "Select tickets" : "Proceed to checkout"}
-              </button>
+              {/* summary */}
+              <div className="mt-5 border-t border-white/10 pt-4 space-y-2">
+                <div className="flex items-center justify-between pt-2 text-sm font-semibold text-white">
+                  <span>Total</span>
+                  <span>{fmtNaira(grandTotal)}</span>
+                </div>
+
+                <p className="text-[12px] text-white/50">
+                  Fees apply only to paid tickets. Free tickets incur no fees.
+                </p>
+
+                <button
+                  onClick={beginCheckout}
+                  disabled={count === 0}
+                  className="group relative mt-2 w-full cursor-pointer rounded-xl bg-pink-600 px-5 py-3 font-semibold text-white transition hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span className="absolute inset-0 -z-10 bg-gradient-to-r from-pink-600 via-fuchsia-600 to-pink-600 opacity-0 blur-xl transition-opacity duration-300 group-hover:opacity-60" />
+                  {count === 0 ? "Select tickets" : "Proceed to checkout"}
+                </button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+              <OrderSummary
+                lines={lines}
+                fees={fees}
+                grandTotal={grandTotal}
+              />
+              <CheckoutForm
+                onBack={() => setCheckoutStep("tickets")}
+                onSubmit={handleCheckoutSubmit}
+                isLoading={isLoading}
+              />
+            </div>
+          )}
           {/* <div className="mt-5 border-t border-white/10 pt-4 space-y-2">
             <div className="flex items-center justify-between text-sm text-white/70">
               <span>Tickets</span>
@@ -387,25 +455,27 @@ export default function EventDetailMain({
       </div>
 
       {/* Sticky mobile checkout bar */}
-      <div className="fixed inset-x-0 bottom-0 z-40 bg-black/70 backdrop-blur-md lg:hidden">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-          <div className="text-sm text-white/80">
-            <span className="font-semibold text-white">
-              {fmtNaira(grandTotal)}
-            </span>{" "}
-            <span className="text-white/60">
-              • {count} {count === 1 ? "ticket" : "tickets"}
-            </span>
+      {checkoutStep === "tickets" && (
+        <div className="fixed inset-x-0 bottom-0 z-40 bg-black/70 backdrop-blur-md lg:hidden">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
+            <div className="text-sm text-white/80">
+              <span className="font-semibold text-white">
+                {fmtNaira(grandTotal)}
+              </span>{" "}
+              <span className="text-white/60">
+                • {count} {count === 1 ? "ticket" : "tickets"}
+              </span>
+            </div>
+            <button
+              onClick={beginCheckout}
+              disabled={count === 0}
+              className="cursor-pointer rounded-xl bg-pink-600 px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {count === 0 ? "Select tickets" : "Checkout"}
+            </button>
           </div>
-          <button
-            onClick={beginCheckout}
-            disabled={count === 0}
-            className="cursor-pointer rounded-xl bg-pink-600 px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {count === 0 ? "Select tickets" : "Checkout"}
-          </button>
         </div>
-      </div>
+      )}
 
       {/* animated Share styles */}
       <style jsx>{`
@@ -438,6 +508,8 @@ export default function EventDetailMain({
           animation: shine 0.8s linear 1;
         }
       `}</style>
+      
+      {isLoading && <LoadingTicket />}
     </section>
   );
 }

@@ -2,7 +2,7 @@
 
 export default function LoadingTicket() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black/90">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backing-blur-sm">
       <div className="relative flex flex-col items-center">
         {/* Ticket Shape */}
         <div className="relative h-32 w-60 rounded-lg  bg-gradient-to-br from-purple-900/60 via-black to-purple-950/80 shadow-lg animate-pulse">
