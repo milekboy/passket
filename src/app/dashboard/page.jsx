@@ -166,7 +166,7 @@ export default function DashboardHome() {
               <h3 className="text-lg font-semibold text-white">
                 Current Balance
               </h3>
-              <span className="rounded-full w-full border border-white/10 bg-white/5 px-2 flex justify-center items-center py-0.5 text-[11px] text-white/70">
+              <span className="rounded-full  border border-white/10 bg-white/5 px-2 flex justify-center items-center py-0.5 text-[11px] text-white/70">
                 NDPA/NDPC compliant
               </span>
             </div>

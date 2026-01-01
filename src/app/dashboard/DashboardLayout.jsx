@@ -40,7 +40,7 @@ export default function DashboardLayout({ children }) {
     <div className="min-h-screen bg-gradient-to-b from-black via-purple-950/40 to-black">
       {/* Top bar */}
       <header className="sticky top-0 z-40 border-b border-white/10 bg-black/40 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
+        <div className="mx-auto flex px-4 items-center justify-between px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setOpen((s) => !s)}
@@ -73,7 +73,7 @@ export default function DashboardLayout({ children }) {
       </header>
 
       {/* Shell */}
-      <div className="mx-auto flex max-w-7xl">
+      <div className="mx-auto flex px-4">
         {/* Sidebar */}
         <aside
           className={`fixed left-0 top-[56px] z-30 h-[calc(100vh-56px)] w-72 transform border-r border-white/10 bg-black/50 p-4 backdrop-blur-md transition-transform lg:static lg:translate-x-0 lg:overflow-hidden ${

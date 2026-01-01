@@ -154,7 +154,7 @@ export default function AdminEventsPage() {
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Link
                     href={`/dashboard/admin-event/${ev.id}`}
-                    className="flex-1 rounded-lg border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-sm text-yellow-300 hover:bg-yellow-400/20 text-center"
+                    className="flex-1 rounded-lg cursor-pointer border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-sm text-yellow-300 hover:bg-yellow-400/20 text-center"
                   >
                     See more
                   </Link>
